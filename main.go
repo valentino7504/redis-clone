@@ -47,7 +47,9 @@ func main() {
 		writer := NewWriter(conn)
 		handler, ok := Handlers[command]
 		if !ok {
-			fmt.Println("Invalid command - valid commands include SET, GET and PING")
+			if command != "COMMAND" {
+				fmt.Println("Invalid command - valid commands include SET, GET and PING")
+			}
 			_ = writer.Write(Value{t: "string", str: ""})
 			continue
 		}
