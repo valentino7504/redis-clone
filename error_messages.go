@@ -8,8 +8,8 @@ import (
 type ErrorType int
 
 const (
-	WrongArgCount ErrorType = iota
-	WrongType
+	WRONG_ARG_COUNT ErrorType = iota
+	WRONG_TYPE
 )
 
 type ErrorMsg struct {
@@ -26,12 +26,12 @@ func (e ErrorMsg) Value() Value {
 
 func (e ErrorMsg) format() string {
 	switch e.Type {
-	case WrongArgCount:
+	case WRONG_ARG_COUNT:
 		return fmt.Sprintf(
 			"ERR wrong number of arguments for '%s' command",
 			strings.ToUpper(e.Command),
 		)
-	case WrongType:
+	case WRONG_TYPE:
 		return "WRONGTYPE Operation against a key holding the wrong kind of value"
 	default:
 		return "ERR unknown error"
