@@ -32,8 +32,8 @@ func main() {
 
 	// read the AOF file
 	err = aof.Read(func(value Value) {
-		command := strings.ToUpper(value.array[0].bulk)
-		args := value.array[1:]
+		command := strings.ToUpper(value.Array[0].Bulk)
+		args := value.Array[1:]
 		handler, ok := Handlers[command]
 		if !ok {
 			fmt.Println("Invalid command in AOF file")
@@ -59,18 +59,18 @@ func main() {
 			fmt.Println(err)
 			return
 		}
-		if val.t != "array" {
+		if val.Type != "array" {
 			fmt.Println("Invalid request, expected array of bulks")
 			continue
 		}
-		if len(val.array) == 0 {
+		if len(val.Array) == 0 {
 			fmt.Println("Error, expected array of length >= 1")
 			continue
 		}
 
 		// convert command to uppercase - redis is not case-sensitive
-		command := strings.ToUpper(val.array[0].bulk)
-		args := val.array[1:]
+		command := strings.ToUpper(val.Array[0].Bulk)
+		args := val.Array[1:]
 
 		writer := NewWriter(conn)
 		handler, ok := Handlers[command]
@@ -78,12 +78,12 @@ func main() {
 			if command != "COMMAND" {
 				fmt.Println("Invalid command - valid commands include SET, GET and PING")
 			}
-			_ = writer.Write(Value{t: "string", str: ""})
+			_ = writer.Write(Value{Type: "string", Str: ""})
 			continue
 		}
 
 		// write to AOF
-		if command == "HSET" || command == "SET" {
+		if command == "HSET" || command == "SET" || command == "DEL" {
 			err = aof.Write(val)
 			if err != nil {
 				fmt.Println("Error writing to AOF file")

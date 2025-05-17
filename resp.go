@@ -16,17 +16,17 @@ const (
 )
 
 type Value struct {
-	t     string
-	str   string
-	num   int
-	bulk  string
-	array []Value
+	Type  string
+	Str   string
+	Int   int
+	Bulk  string
+	Array []Value
 }
 
 func (v Value) String() string {
 	return fmt.Sprintf(
 		"Type: %v, String: %v, Num: %v, Bulk: %v, Array: %+v\n",
-		v.t, v.str, v.num, v.bulk, v.array,
+		v.Type, v.Str, v.Int, v.Bulk, v.Array,
 	)
 }
 
@@ -75,25 +75,25 @@ func (r *Resp) readInteger() (int, int, error) {
 // readArray function. Reads size of the array first then populates the array
 // by reading all the bulks in the command
 func (r *Resp) readArray() (Value, error) {
-	v := Value{t: "array"}
+	v := Value{Type: "array"}
 	length, _, err := r.readInteger()
 	if err != nil {
 		return v, err
 	}
-	v.array = make([]Value, length)
-	for i := range v.array {
+	v.Array = make([]Value, length)
+	for i := range v.Array {
 		val, err := r.Read()
 		if err != nil {
 			return v, err
 		}
-		v.array[i] = val
+		v.Array[i] = val
 	}
 	return v, nil
 }
 
 // readBulk is a helper to read bulks. Supports readArray when parsing syntax from the CLI.
 func (r *Resp) readBulk() (Value, error) {
-	v := Value{t: "bulk"}
+	v := Value{Type: "bulk"}
 	length, _, err := r.readInteger()
 	if err != nil {
 		return v, err
@@ -103,7 +103,7 @@ func (r *Resp) readBulk() (Value, error) {
 	if err != nil {
 		return v, err
 	}
-	v.bulk = string(bulk)
+	v.Bulk = string(bulk)
 	_, _, err = r.readLine()
 	if err != nil {
 		return v, err
@@ -133,9 +133,9 @@ func (r *Resp) Read() (Value, error) {
 func (v Value) marshalArray() []byte {
 	var bytes []byte
 	bytes = append(bytes, ARRAY)
-	bytes = append(bytes, strconv.Itoa(len(v.array))...)
+	bytes = append(bytes, strconv.Itoa(len(v.Array))...)
 	bytes = append(bytes, '\r', '\n')
-	for _, val := range v.array {
+	for _, val := range v.Array {
 		bytes = append(bytes, val.Marshal()...)
 	}
 	return bytes
@@ -145,9 +145,18 @@ func (v Value) marshalArray() []byte {
 func (v Value) marshalBulk() []byte {
 	var bytes []byte
 	bytes = append(bytes, BULK)
-	bytes = append(bytes, strconv.Itoa(len(v.bulk))...)
+	bytes = append(bytes, strconv.Itoa(len(v.Bulk))...)
 	bytes = append(bytes, '\r', '\n')
-	bytes = append(bytes, v.bulk...)
+	bytes = append(bytes, v.Bulk...)
+	bytes = append(bytes, '\r', '\n')
+	return bytes
+}
+
+// marshals integers into arrays of bytes
+func (v Value) marshalInt() []byte {
+	var bytes []byte
+	bytes = append(bytes, INTEGER)
+	bytes = append(bytes, strconv.Itoa(v.Int)...)
 	bytes = append(bytes, '\r', '\n')
 	return bytes
 }
@@ -156,7 +165,7 @@ func (v Value) marshalBulk() []byte {
 func (v Value) marshalString() []byte {
 	var bytes []byte
 	bytes = append(bytes, STRING)
-	bytes = append(bytes, v.str...)
+	bytes = append(bytes, v.Str...)
 	bytes = append(bytes, '\r', '\n')
 	return bytes
 }
@@ -170,18 +179,20 @@ func (v Value) marshalNull() []byte {
 func (v Value) marshalError() []byte {
 	var bytes []byte
 	bytes = append(bytes, ERROR)
-	bytes = append(bytes, v.str...)
+	bytes = append(bytes, v.Str...)
 	bytes = append(bytes, '\r', '\n')
 	return bytes
 }
 
 // generic marshalling function that calls other specific ones
 func (v Value) Marshal() []byte {
-	switch v.t {
+	switch v.Type {
 	case "array":
 		return v.marshalArray()
 	case "bulk":
 		return v.marshalBulk()
+	case "integer":
+		return v.marshalInt()
 	case "string":
 		return v.marshalString()
 	case "null":
