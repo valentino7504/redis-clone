@@ -25,8 +25,8 @@ This project supports a subset of Redis commands and uses the RESP protocol for 
 ## Getting Started
 
 ```bash
-git clone <your-repo-url>
-cd <repo-directory>
+git clone https://github.com/valentino7504/redis-clone.git
+cd redis-clone
 go run .
 ```
 
