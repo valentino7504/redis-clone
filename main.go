@@ -18,6 +18,34 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	aof, err := NewAof("db.aof")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer func() {
+		err = aof.Close()
+		if err != nil {
+			fmt.Println("Error closing the aof:", err)
+		}
+	}()
+
+	// read the AOF file
+	err = aof.Read(func(value Value) {
+		command := strings.ToUpper(value.array[0].bulk)
+		args := value.array[1:]
+		handler, ok := Handlers[command]
+		if !ok {
+			fmt.Println("Invalid command in AOF file")
+			return
+		}
+		_ = handler(args)
+	})
+	if err != nil {
+		fmt.Println("Error reading AOF file")
+		return
+	}
+
 	defer func() {
 		err = conn.Close()
 		if err != nil {
@@ -52,6 +80,14 @@ func main() {
 			}
 			_ = writer.Write(Value{t: "string", str: ""})
 			continue
+		}
+
+		// write to AOF
+		if command == "HSET" || command == "SET" {
+			err = aof.Write(val)
+			if err != nil {
+				fmt.Println("Error writing to AOF file")
+			}
 		}
 
 		// write the response
