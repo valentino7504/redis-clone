@@ -66,7 +66,7 @@ func hdel(args []Value) Value {
 	storeMutex.Lock()
 	defer storeMutex.Unlock()
 	storedVal, ok := store[hash]
-	count := 0
+	var count int64
 	if !ok {
 		return Value{Type: "integer", Int: count}
 	}
