@@ -31,6 +31,11 @@ var Handlers = map[string]func([]Value) Value{
 	"HGET":    hget,
 	"HGETALL": hgetall,
 	"HDEL":    hdel,
+	// int handlers
+	"INCR":   incr,
+	"DECR":   decr,
+	"INCRBY": incrby,
+	"DECRBY": decrby,
 }
 
 var (
@@ -46,7 +51,7 @@ func ping(args []Value) Value {
 }
 
 func exists(args []Value) Value {
-	count := 0
+	var count int64
 	storeMutex.RLock()
 	for _, key := range args {
 		if _, ok := store[key.Bulk]; ok {
@@ -83,7 +88,7 @@ func del(args []Value) Value {
 		return ErrorMsg{Type: WRONG_ARG_COUNT, Command: "DEL"}.Value()
 	}
 	storeMutex.Lock()
-	count := 0
+	var count int64
 	for _, key := range args {
 		if _, ok := store[key.Bulk]; ok {
 			count++
