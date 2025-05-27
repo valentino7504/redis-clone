@@ -10,6 +10,8 @@ type ErrorType int
 const (
 	WRONG_ARG_COUNT ErrorType = iota
 	WRONG_TYPE
+	INT_ERROR
+	OVERFLOW_ERROR
 )
 
 type ErrorMsg struct {
@@ -33,6 +35,10 @@ func (e ErrorMsg) format() string {
 		)
 	case WRONG_TYPE:
 		return "WRONGTYPE Operation against a key holding the wrong kind of value"
+	case INT_ERROR:
+		return "ERR value is not an integer or out of range"
+	case OVERFLOW_ERROR:
+		return "ERR increment or decrement would overflow"
 	default:
 		return "ERR unknown error"
 	}
