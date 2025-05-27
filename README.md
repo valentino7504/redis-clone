@@ -6,21 +6,35 @@ This project supports a subset of Redis commands and uses the RESP protocol for 
 ## Features
 
 - RESP protocol parser
-- Basic Redis commands:
+- Generic Commands
   - `PING`
+  - `DEL`
+  - `EXISTS`
+  - `TYPE`
+- String Commands
   - `SET`
   - `GET`
+- Hash Commands
   - `HSET`
   - `HGET`
   - `HGETALL`
+  - `HDEL`
+- Int Commands
+  - `INCR`
+  - `DECR`
+  - `INCRBY`
+  - `DECRBY`
 - AOF (Append Only File) persistence
 
 ## File Structure
 
 - `main.go` — Entry point of the server
+- `generic_handlers.go` — Command handlers for supported Redis generic commands
+- `hash_handlers.go` — Command handlers for supported Redis hash commands
+- `string_handlers.go` — Command handlers for supported Redis string commands
 - `aof.go` — Handles AOF-based data persistence
-- `handler.go` — Command handlers for supported Redis commands
 - `resp.go` — RESP protocol parser and encoder
+- `error_messages.go` — Error handler
 
 ## Getting Started
 
