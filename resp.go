@@ -156,7 +156,7 @@ func (v Value) marshalBulk() []byte {
 func (v Value) marshalInt() []byte {
 	var bytes []byte
 	bytes = append(bytes, INTEGER)
-	bytes = append(bytes, strconv.Itoa(v.Int)...)
+	bytes = append(bytes, strconv.Itoa(int(v.Int))...)
 	bytes = append(bytes, '\r', '\n')
 	return bytes
 }
